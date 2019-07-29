@@ -6,20 +6,20 @@ const test = function () {
   const cache = event.on([ 'test', 'test2' ], [
     function(val) {
       console.log('11111');
-      console.log(val);
+      // console.log(val);
     },
     function(val) {
       console.log('22222');
+      // console.log(val);
+    },
+  ]);
+  event.on('test2', [
+    function(val) {
+      console.log('3333');
       console.log(val);
     },
   ]);
-  console.log(cache);
-  // event.on('test2', [
-  //   function(val) {
-  //     console.log('3333');
-  //     console.log(val);
-  //   },
-  // ])
+  event.removeEventFunction(cache.test2);
 }.bind({
   a: 1
 })

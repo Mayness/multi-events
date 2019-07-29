@@ -15,6 +15,7 @@ interface EasyEvents {
   constructor(): void;
   on(eventName: Array<string>, callback: Array<Function>): EventCache;
   emit(eventName: Array<string>, ...arg: Array<any>): void;
+  removeEventFunction(id: Symbol): void;
 }
 
 
@@ -62,6 +63,9 @@ function emitEventCheck(target: any, key: string, descriptor: PropertyDescriptor
   return descriptor;
 }
 
+function getSymbolDes(symbol: Symbol) {
+  return symbol.description ? symbol.description : symbol.toString().replace(/^Symbol\((\S+)\)$/g, '$1');
+}
 
 class EasyEvents {
   constructor() {
@@ -98,6 +102,21 @@ class EasyEvents {
         });
       }
     });
+  }
+
+  removeEventFunction(id: Symbol) {
+    const key = getSymbolDes(id);
+    const fnArray = this._events[ key ];
+    if (fnArray) {
+      this._events[ key ] = fnArray.filter(item => {
+        if (item.id !== id) {
+          return false;
+        }
+      });
+    } else {
+      console.log(11);
+    }
+    console.log(key);
   }
 }
 
