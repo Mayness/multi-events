@@ -3,7 +3,7 @@ const EasyEvent = require('../lib/event.ts');
 const event = new EasyEvent();
 
 const test = function () {
-  event.on('test', [
+  const cache = event.on([ 'test', 'test2' ], [
     function(val) {
       console.log('11111');
       console.log(val);
@@ -12,13 +12,14 @@ const test = function () {
       console.log('22222');
       console.log(val);
     },
-  ])
-  event.on('test2', [
-    function(val) {
-      console.log('3333');
-      console.log(val);
-    },
-  ])
+  ]);
+  console.log(cache);
+  // event.on('test2', [
+  //   function(val) {
+  //     console.log('3333');
+  //     console.log(val);
+  //   },
+  // ])
 }.bind({
   a: 1
 })

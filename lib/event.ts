@@ -1,55 +1,64 @@
+interface EventCache {
+  [propName: string]: Symbol,
+}
 
 interface _events {
-  [ propName: string ]: Array<Function>
+  [propName: string]: Array<{
+    fn: Array<Function>,
+    id: Symbol,
+  }>;
 }
 
 interface EasyEvents {
   _events: _events;
   _eventsCount: number;
   constructor(): void;
-  on(eventName: string, callback: Array<Function>): void;
-  emit(eventName: Array<string>, ...arg: Array<any>):void;
+  on(eventName: Array<string>, callback: Array<Function>): EventCache;
+  emit(eventName: Array<string>, ...arg: Array<any>): void;
 }
 
-function onEventCheck(target: any, key: string, descriptor: PropertyDescriptor):PropertyDescriptor {
+
+function onEventCheck(target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
   const fn = descriptor.value;
-  descriptor.value = function (eventName: string, callback: Array<Function> | Function) {
+  descriptor.value = function(eventName: Array<string> | string, callback: Array<Function> | Function) {
     if (callback) {
       if (typeof callback === 'function') {
-        callback = [ callback ]
+        callback = [callback];
       } else if (Array.isArray(callback)) {
         callback.forEach(fn => {
           if (typeof fn !== 'function') {
-            throw Error('parameter Error')
+            throw Error('parameter Error');
           }
-        })
+        });
       } else {
         throw Error('parameter Error');
       }
     } else {
-      throw Error('Missing necessary parameters')
+      throw Error('Missing necessary parameters');
     }
-    Reflect.apply(fn, this, arguments);
-  }
+    arguments[ 0 ] = Array.isArray(eventName) ? Array.from(new Set(eventName)) : [eventName];
+    return Reflect.apply(fn, this, arguments);
+  };
   return descriptor;
 }
 
-function emitEventCheck(target: any, key: string, descriptor: PropertyDescriptor):PropertyDescriptor {
+function emitEventCheck(target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
   const fn = descriptor.value;
-  descriptor.value = function(event: string|Array<string>) {
+  descriptor.value = function(event: string | Array<string>) {
     if (typeof event === 'string') {
-      arguments[ 0 ] = [ event ];
+      arguments[0] = [event];
     } else if (Array.isArray(event)) {
       event.forEach(item => {
         if (typeof item !== 'string') {
           throw Error('parameter Error');
-        } 
-      })
+        }
+      });
+      arguments[0] = Array.from(new Set(event));
     } else {
       throw Error('parameter Error');
     }
     Reflect.apply(fn, this, arguments);
-  }
+  };
   return descriptor;
 }
 
@@ -61,23 +70,34 @@ class EasyEvents {
   }
 
   @onEventCheck
-  on(eventName: string, callback: Array<Function>) {
-    this._eventsCount += callback.length;
-    if (this._events[ eventName ]) {
-      this._events[ eventName ].concat(callback);
-    } else {
-      this._events[ eventName ] = callback;
+  on(eventArray: Array<string>, callback: Array<Function>) {
+    this._eventsCount += callback.length * eventArray.length;
+    const cache:EventCache = {};
+    for (const eventName of eventArray) {
+      let fnArray = this._events[eventName] || [];
+      const id = Symbol(eventName);
+      fnArray.push({
+        fn: callback,
+        id,
+      });
+      this._events[eventName] = fnArray;
+      cache[ eventName ] = id;
     }
+    return cache;
   }
 
   @emitEventCheck
   emit(eventArray: Array<string>, ...arg: Array<any>) {
     eventArray.forEach(eventName => {
-      const cbList = this._events[ eventName ];
+      const cbList = this._events[eventName];
       if (cbList) {
-        cbList.forEach(fn => Reflect.apply(fn, this, arg));
+        cbList.forEach(item => {
+          item.fn.forEach(fn => {
+            Reflect.apply(fn, this, arg)
+          })
+        });
       }
-    })
+    });
   }
 }
 
