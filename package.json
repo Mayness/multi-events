@@ -1,5 +1,5 @@
 {
-  "name": "easy-events",
+  "name": "multi-events",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Mayness/easy-events.git"
+    "url": "git+https://github.com/Mayness/multi-events.git"
   },
   "author": "mayness",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Mayness/easy-events/issues"
+    "url": "https://github.com/Mayness/multi-events/issues"
   },
-  "homepage": "https://github.com/Mayness/easy-events#readme",
+  "homepage": "https://github.com/Mayness/multi-events#readme",
   "dependencies": {
     "@types/es6-shim": "^0.31.39",
     "@types/node": "^12.6.8"

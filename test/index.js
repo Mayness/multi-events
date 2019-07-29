@@ -1,15 +1,29 @@
-const EasyEvent = require('../dist/event.js');
+const EasyEvent = require('../lib/event.ts');
 
 const event = new EasyEvent();
 
 const test = function () {
-  event.on('test', function() {
-    console.log(this);
-  })
+  event.on('test', [
+    function(val) {
+      console.log('11111');
+      console.log(val);
+    },
+    function(val) {
+      console.log('22222');
+      console.log(val);
+    },
+  ])
+  event.on('test2', [
+    function(val) {
+      console.log('3333');
+      console.log(val);
+    },
+  ])
 }.bind({
   a: 1
 })
 
 test();
 
-event.emit('test', 22)
+event.emit([ 'test', 'test2' ], 22)
+event.emit('test2', 555)

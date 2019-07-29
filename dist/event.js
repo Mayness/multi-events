@@ -1,11 +1,14 @@
-var R = typeof Reflect === 'object' ? Reflect : null;
-var ReflectApply = R && typeof R.apply === 'function'
-    ? R.apply
-    : function ReflectApply(target, receiver, args) {
-        return Function.prototype.apply.call(target, receiver, args);
-    };
-function isFunction(params) {
-    return typeof params === 'function';
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+// function isFunction(params: object) {
+//   return typeof params === 'function';
+// }
+function isFunction(target, key, descriptor) {
+    console.log(target);
 }
 var EasyEvents = /** @class */ (function () {
     function EasyEvents() {
@@ -13,9 +16,9 @@ var EasyEvents = /** @class */ (function () {
         this._eventsCount = 0;
     }
     EasyEvents.prototype.on = function (eventName, callback) {
-        if (!isFunction(callback)) {
-            throw TypeError('event callback must be Function');
-        }
+        // if (!isFunction(callback)) {
+        //   throw TypeError('event callback must be Function');
+        // }
         this._eventsCount++;
         if (this._events[eventName]) {
             this._events[eventName].push(callback);
@@ -32,9 +35,12 @@ var EasyEvents = /** @class */ (function () {
         }
         var cbList = this._events[eventName];
         if (cbList) {
-            cbList.forEach(function (item) { return ReflectApply(item, _this, arg); });
+            cbList.forEach(function (fn) { return Reflect.apply(fn, _this, arg); });
         }
     };
+    __decorate([
+        isFunction
+    ], EasyEvents.prototype, "on", null);
     return EasyEvents;
 }());
 module.exports = EasyEvents;

@@ -1,6 +1,3 @@
-interface ReflectApply {
-    (target: object, receiver: EasyEvents, arg: Array<applyFunction>): void;
-}
 interface applyFunction {
     (): void;
 }
@@ -10,12 +7,11 @@ interface _events {
 interface EasyEvents {
     _events: _events;
     _eventsCount: number;
+    constructor(): void;
     on(eventName: string, callback: applyFunction): void;
     emit(eventName: string, ...arg: Array<applyFunction>): void;
 }
-declare const R: typeof Reflect;
-declare const ReflectApply: ReflectApply;
-declare function isFunction(params: object): boolean;
+declare function isFunction(target: any, key: string, descriptor: PropertyDescriptor): void;
 declare class EasyEvents {
     constructor();
 }

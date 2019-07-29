@@ -1,58 +1,83 @@
-interface ReflectApply {
-  (target: object, receiver: EasyEvents, arg: Array<applyFunction>): void;
-}
-
-interface applyFunction {
-  (): void;
-}
 
 interface _events {
-  [ propName: string ]: Array<applyFunction>
+  [ propName: string ]: Array<Function>
 }
 
 interface EasyEvents {
   _events: _events;
   _eventsCount: number;
   constructor(): void;
-  on(eventName: string, callback: applyFunction): void;
-  emit(eventName: string, ...arg: Array<applyFunction>):void;
+  on(eventName: string, callback: Array<Function>): void;
+  emit(eventName: Array<string>, ...arg: Array<any>):void;
 }
 
-
-
-
-const R = typeof Reflect === 'object' ? Reflect : null
-const ReflectApply: ReflectApply = R && typeof R.apply === 'function'
-  ? R.apply
-  : function ReflectApply(target, receiver, args) {
-    return Function.prototype.apply.call(target, receiver, args);
+function onEventCheck(target: any, key: string, descriptor: PropertyDescriptor):PropertyDescriptor {
+  const fn = descriptor.value;
+  descriptor.value = function (eventName: string, callback: Array<Function> | Function) {
+    if (callback) {
+      if (typeof callback === 'function') {
+        callback = [ callback ]
+      } else if (Array.isArray(callback)) {
+        callback.forEach(fn => {
+          if (typeof fn !== 'function') {
+            throw Error('parameter Error')
+          }
+        })
+      } else {
+        throw Error('parameter Error');
+      }
+    } else {
+      throw Error('Missing necessary parameters')
+    }
+    Reflect.apply(fn, this, arguments);
   }
-
-function isFunction(params: object) {
-  return typeof params === 'function';
+  return descriptor;
 }
+
+function emitEventCheck(target: any, key: string, descriptor: PropertyDescriptor):PropertyDescriptor {
+  const fn = descriptor.value;
+  descriptor.value = function(event: string|Array<string>) {
+    if (typeof event === 'string') {
+      arguments[ 0 ] = [ event ];
+    } else if (Array.isArray(event)) {
+      event.forEach(item => {
+        if (typeof item !== 'string') {
+          throw Error('parameter Error');
+        } 
+      })
+    } else {
+      throw Error('parameter Error');
+    }
+    Reflect.apply(fn, this, arguments);
+  }
+  return descriptor;
+}
+
 
 class EasyEvents {
   constructor() {
     this._events = Object.create({});
     this._eventsCount = 0;
   }
-  on(eventName: string, callback: applyFunction) {
-    if (!isFunction(callback)) {
-      throw TypeError('event callback must be Function');
-    }
-    this._eventsCount++;
+
+  @onEventCheck
+  on(eventName: string, callback: Array<Function>) {
+    this._eventsCount += callback.length;
     if (this._events[ eventName ]) {
-      this._events[ eventName ].push(callback);
+      this._events[ eventName ].concat(callback);
     } else {
-      this._events[ eventName ] = [ callback ];
+      this._events[ eventName ] = callback;
     }
   }
-  emit(eventName: string, ...arg: Array<applyFunction>) {
-    const cbList = this._events[ eventName ];
-    if (cbList) {
-      cbList.forEach(item => ReflectApply(item, this, arg));
-    }
+
+  @emitEventCheck
+  emit(eventArray: Array<string>, ...arg: Array<any>) {
+    eventArray.forEach(eventName => {
+      const cbList = this._events[ eventName ];
+      if (cbList) {
+        cbList.forEach(fn => Reflect.apply(fn, this, arg));
+      }
+    })
   }
 }
 
