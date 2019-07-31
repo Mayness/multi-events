@@ -70,9 +70,10 @@ function formatReq(disRepeat: boolean = true, index: number = 0): MethodDecorato
 }
 
 /**
- * @description: 通用格式化返回参数，传入事件是什么格式就返回什么格式
- * @param {Array} data
- * @return:
+ * @description: 通用格式化返回参数，传入参数是什么格式就返回什么格式
+ * @param {resType} type 限定传入的数据类型，默认是array
+ * @param {number} index 需要格式化参数的小标，默认是第一个参数
+ * @return: {MethodDecorator} 方法装饰器，内部触发格式化后的返回值
  */
 enum resType {
   object,
@@ -85,7 +86,7 @@ function formatRes(type: resType = resType.array, index: number = 0): MethodDeco
       const value = arguments[index];
       const data = Reflect.apply(fn, this, arguments);
       // 传入参数为Array，返回String 或者 传入参数数为Object，返回Symbol，则结果就只返回第1位，反之则全返回
-      const flag:boolean = type === resType.array && getType<String>(value, 'String') || type === resType.object && getType<Symbol>(value, 'Symbol')
+      const flag: boolean = type === resType.array && getType<String>(value, 'String') || type === resType.object && getType<Symbol>(value, 'Symbol')
       return flag ? data[ 0 ] : data;
     };
     return descriptor;
