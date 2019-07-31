@@ -1,4 +1,4 @@
-# easy-events
+# multi-events
 
 触发多个事件  
 event.emit(event, params)  
