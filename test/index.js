@@ -4,27 +4,25 @@ const event = new EasyEvent();
 
 const test = function () {
   const cache = event.on([ 'test', 'test2' ], [
-    function(val) {
+    function(val, key) {
       console.log('11111');
-      // console.log(val);
+      console.log(key);
     },
-    function(val) {
-      console.log('22222');
-      // console.log(val);
+    function(val, key) {
+      console.log(key, '要被删掉');
     },
   ]);
-  event.on('test2', [
-    function(val) {
+  const cache1 = event.on('test2', [
+    function(val, key) {
       console.log('3333');
-      console.log(val);
+      console.log(key);
     },
   ]);
-  event.removeEventFunction(cache.test2);
+  event.removeEventFunction([ cache1 ]);
 }.bind({
   a: 1
 })
 
 test();
-
 event.emit([ 'test', 'test2' ], 22)
 event.emit('test2', 555)
