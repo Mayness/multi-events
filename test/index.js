@@ -18,7 +18,9 @@ const test = function () {
       console.log(key);
     },
   ]);
-  event.removeEventFunction([ cache1 ]);
+  const cache2 = '1';
+  // console.log(event.removeEvent([ 'test2', cache2 ]));
+  console.log(event.removeEventFunction([ cache, cache1 ]));
 }.bind({
   a: 1
 })
