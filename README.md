@@ -20,3 +20,7 @@ event.removeEventFunction([ id1 ]);  // 返回[ true, true ]，和上面表示�
 event.removeEventFunction([ id1, id2, 'undefined' ]);  // 返回[ true, true, false ]  
 event.removeEventFunction([ id1.event1, id2 ]);  // 只用传id2即可，因为本身就是symbol类型，返回 [ true, true ]  
 event.removeEventFunction([ id1.event1, id3.event1 ]);  // 返回[ true, true ]  
+
+
+
+event.removeEventFunction('newEventListener', function(event) {});  // 有新订阅事件触发的函数

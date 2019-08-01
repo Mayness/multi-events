@@ -85,9 +85,9 @@ function formatRes(type: resType = resType.array, index: number = 0): MethodDeco
     descriptor.value = function() {
       const value = arguments[index];
       const data = Reflect.apply(fn, this, arguments);
-      // 传入参数为Array，返回String 或者 传入参数数为Object，返回Symbol，则结果就只返回第1位，反之则全返回
+      // 传入参数为Array，返回String 或者 传入参数数为Object，返回Symbol，则结果就只返回第1位（如果结果是对象则返回值的第1位），反之则全返回
       const flag: boolean = type === resType.array && getType<String>(value, 'String') || type === resType.object && getType<Symbol>(value, 'Symbol')
-      return flag ? data[ 0 ] : data;
+      return flag ? Array.isArray(data) ? data[ 0 ] : Object.values(data)[ 0 ] : data;
     };
     return descriptor;
   };
@@ -103,7 +103,7 @@ type idType = Array<Symbol> | EventCache | Symbol;
 function removeEventFunctionCheck(target: MultiEvents, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
   const fn = descriptor.value;
   descriptor.value = function(ids: idType) {
-    const arr = deepObjectToArray(ids);
+    const arr = unwrapListeners(ids);
     if (arr.length) {
       return Reflect.apply(fn, this, [arr]);
     } else {
@@ -126,14 +126,15 @@ function getType<T>(s: any, type: string): s is T {
  * @param {idType}
  * @return {Array<Symbol>}
  */
-function deepObjectToArray(value: any): Array<Symbol> {
+
+function unwrapListeners(value: any): Array<Symbol> {
   let arr: Array<Symbol> = [];
   if (getType<Symbol>(value, 'Symbol')) {
     arr = [value];
   } else if (typeof value === 'object') {
     for (let i in value) {
       if (getType<EventCache>(value[i], 'Object')) {
-        arr = arr.concat(deepObjectToArray(value[i]));
+        arr = arr.concat(unwrapListeners(value[i]));
       } else  {
         arr.push(value[i]);
       }
@@ -148,8 +149,13 @@ class MultiEvents {
     this._eventsCount = 0;
   }
 
+  @formatRes()
   @onEventCheck
   on(eventArray: Array<string>, callback: Array<Function>) {
+    return this._addEvent(eventArray, callback);
+  }
+
+  private _addEvent(eventArray: Array<string>, callback: Array<Function>) {
     this._eventsCount += callback.length * eventArray.length;
     const cache: EventCache = {};
     for (const eventName of eventArray) {
@@ -161,24 +167,37 @@ class MultiEvents {
       });
       this._events[eventName] = fnArray;
       cache[eventName] = id;
+      if (eventName !== 'newEventListener') {
+        this.emit([ 'newEventListener' ], eventName);
+      }
     }
-    const s = Object.values(cache);
-    return s.length === 1 ? s[0] : cache;
+    return cache;
   }
 
   @formatReq()
   emit(eventArray: Array<string>, ...arg: Array<any>) {
+    this._emitEvent(eventArray, ...arg)
+  }
+
+  private _emitEvent(eventArray: Array<string>, ...arg: Array<any>) {
     eventArray.forEach(eventName => {
       const cbList = this._events[eventName];
       if (cbList) {
         cbList.forEach(item => {
           item.fn.forEach(fn => {
-            Reflect.apply(fn, this, [...arg, eventName]);
+            Reflect.apply(fn, this, arg);
           });
         });
       }
     });
   }
+
+  once(eventArray: string, callback: Function) {
+    const cb = onceWrap(eventArray, callback, this);
+    this._addEvent([ eventArray ], [ cb ]);
+    // console.log(cb.toString());
+  }
+
 
   @formatRes()
   @formatReq(false)
@@ -210,25 +229,32 @@ class MultiEvents {
       const fnArray = this._events[eventName];
       let flag: boolean = false;
       if (fnArray) {
-        const nowEventItem = fnArray.filter(item => {
-          if (item.id !== id) {
-            return true;
-          } else {
-            flag = true;
+        const index = fnArray.findIndex(item => {
+          if (item.id === id) {
             removeNum += item.fn.length;
+            return true;
           }
         });
-        if (nowEventItem.length) {
-          this._events[eventName] = nowEventItem;
-        } else {
-          delete this._events[eventName];
+        if (index >= 0) {
+          flag = true;
+          fnArray.splice(index, 1);
+          // 如果当前监听队列为空，则删除当前监听对象
+          if (!fnArray.length) delete this._events[eventName];
         }
-        console.log(this._events);
       }
       cache.push(flag);
     }
     this._eventsCount -= removeNum;
     return cache;
+  }
+}
+
+
+function onceWrap(eventArray: string, callback: Function, target: MultiEvents):Function {
+  console.log(this);
+  return function() {
+    const id = target._events[ eventArray ][ 0 ];
+    return Reflect.apply(callback, target, arguments);
   }
 }
 
