@@ -1,13 +1,13 @@
+import EventSub from './sub';
+
 interface EventCache {
   [propName: string]: Symbol;
 }
 
 interface _events {
-  [propName: string]: Array<{
-    fn: Array<Function>;
-    id: Symbol;
-  }>;
+  [propName: string]: Array<EventSub>;
 }
+
 
 interface MultiEvents {
   _events: _events;
@@ -19,28 +19,10 @@ interface MultiEvents {
   removeEventFunction(id: Array<Symbol>): Array<boolean> | boolean;
 }
 
-function onEventCheck(target: MultiEvents, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-  const fn = descriptor.value;
-  descriptor.value = function(eventName: Array<string> | string, callback: Array<Function> | Function) {
-    if (callback) {
-      if (typeof callback === 'function') {
-        callback = [callback];
-      } else if (Array.isArray(callback)) {
-        callback.forEach(fn => {
-          if (typeof fn !== 'function') {
-            throw Error('parameter Error');
-          }
-        });
-      } else {
-        throw Error('parameter Error');
-      }
-    } else {
-      throw Error('Missing necessary parameters');
-    }
-    arguments[0] = Array.isArray(eventName) ? Array.from(new Set(eventName)) : [eventName];
-    return Reflect.apply(fn, this, arguments);
-  };
-  return descriptor;
+interface WrapObj {
+  id: Symbol,
+  cbArray: Array<Function>,
+  eventName: string,
 }
 
 /**
@@ -85,6 +67,7 @@ function formatRes(type: resType = resType.array, index: number = 0): MethodDeco
     descriptor.value = function() {
       const value = arguments[index];
       const data = Reflect.apply(fn, this, arguments);
+      if (!data) return;
       // 传入参数为Array，返回String 或者 传入参数数为Object，返回Symbol，则结果就只返回第1位（如果结果是对象则返回值的第1位），反之则全返回
       const flag: boolean = type === resType.array && getType<String>(value, 'String') || type === resType.object && getType<Symbol>(value, 'Symbol')
       return flag ? Array.isArray(data) ? data[ 0 ] : Object.values(data)[ 0 ] : data;
@@ -103,7 +86,7 @@ type idType = Array<Symbol> | EventCache | Symbol;
 function removeEventFunctionCheck(target: MultiEvents, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
   const fn = descriptor.value;
   descriptor.value = function(ids: idType) {
-    const arr = unwrapListeners(ids);
+    const arr = unwrapId(ids);
     if (arr.length) {
       return Reflect.apply(fn, this, [arr]);
     } else {
@@ -127,14 +110,14 @@ function getType<T>(s: any, type: string): s is T {
  * @return {Array<Symbol>}
  */
 
-function unwrapListeners(value: any): Array<Symbol> {
+function unwrapId(value: any): Array<Symbol> {
   let arr: Array<Symbol> = [];
   if (getType<Symbol>(value, 'Symbol')) {
     arr = [value];
   } else if (typeof value === 'object') {
     for (let i in value) {
       if (getType<EventCache>(value[i], 'Object')) {
-        arr = arr.concat(unwrapListeners(value[i]));
+        arr = arr.concat(unwrapId(value[i]));
       } else  {
         arr.push(value[i]);
       }
@@ -143,6 +126,8 @@ function unwrapListeners(value: any): Array<Symbol> {
   return arr;
 }
 
+
+
 class MultiEvents {
   constructor() {
     this._events = Object.create({});
@@ -150,7 +135,7 @@ class MultiEvents {
   }
 
   @formatRes()
-  @onEventCheck
+  @formatReq()
   on(eventArray: Array<string>, callback: Array<Function>) {
     return this._addEvent(eventArray, callback);
   }
@@ -161,10 +146,8 @@ class MultiEvents {
     for (const eventName of eventArray) {
       let fnArray = this._events[eventName] || [];
       const id = Symbol(eventName);
-      fnArray.push({
-        fn: callback,
-        id
-      });
+      const sub = new EventSub(id, callback);
+      fnArray.push(sub);
       this._events[eventName] = fnArray;
       cache[eventName] = id;
       if (eventName !== 'newEventListener') {
@@ -184,18 +167,31 @@ class MultiEvents {
       const cbList = this._events[eventName];
       if (cbList) {
         cbList.forEach(item => {
-          item.fn.forEach(fn => {
-            Reflect.apply(fn, this, arg);
-          });
+          item.applyFunction(arg);
         });
       }
     });
   }
 
-  once(eventArray: string, callback: Function) {
-    const cb = onceWrap(eventArray, callback, this);
-    this._addEvent([ eventArray ], [ cb ]);
-    // console.log(cb.toString());
+  @formatRes()
+  @formatReq()
+  once(eventArray: Array<string>, callback: Array<Function>) {
+    let onceWrapArray = [];
+    // 存储订阅事件的包裹对象，方便后面取到id
+    let onceCache = [];
+    for (let item of eventArray) {
+      const wrapObj:WrapObj = { id: null, cbArray: callback, eventName: item };
+      const cb = onceWrap(item, wrapObj, this);
+      onceWrapArray.push(cb);
+      onceCache.push(wrapObj);
+    }
+    const cache = this._addEvent(eventArray, onceWrapArray);
+    for (let item of onceCache) {
+      if (cache[ item.eventName ]) {
+        item.id = cache[ item.eventName ];
+      }
+    }
+    return cache;
   }
 
 
@@ -208,7 +204,7 @@ class MultiEvents {
       const fnArray = this._events[eventName];
       if (fnArray) {
         const num = fnArray.reduce((total, curr) => {
-          return (total += curr.fn.length);
+          return (total += curr.size);
         }, 0);
         this._eventsCount -= num;
         delete this._events[eventName];
@@ -231,7 +227,7 @@ class MultiEvents {
       if (fnArray) {
         const index = fnArray.findIndex(item => {
           if (item.id === id) {
-            removeNum += item.fn.length;
+            removeNum += item.size;
             return true;
           }
         });
@@ -250,11 +246,12 @@ class MultiEvents {
 }
 
 
-function onceWrap(eventArray: string, callback: Function, target: MultiEvents):Function {
-  console.log(this);
+function onceWrap(eventArray: string, obj: any, target: MultiEvents):Function {
   return function() {
-    const id = target._events[ eventArray ][ 0 ];
-    return Reflect.apply(callback, target, arguments);
+    target.removeEventFunction([ obj.id ])
+    for (let fn of obj.cbArray) {
+      Reflect.apply(fn, target, arguments);
+    }
   }
 }
 

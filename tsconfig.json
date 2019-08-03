@@ -6,13 +6,11 @@
     "noImplicitThis": true,
     "module": "commonjs",
     "target": "es2019",
-    // 为ts自动生成.d.ts声明文件
-    "declaration": true,
     "baseUrl": "./",
     "experimentalDecorators": true,
     "paths": {
       "@tps/*": ["types/*"],
     }
   },
-  "include": ["./lib/**/*", "types/*"]
+  "include": ["./lib/**/*", "types/*", "lib/sub/sub.d.ts"]
 }

@@ -1,5 +1,8 @@
 const EasyEvent = require('../lib/event.ts');
 
+
+
+// const event = new EasyEvent();
 const event = new EasyEvent();
 
 const test = function () {
@@ -22,10 +25,23 @@ const test = function () {
   //     console.log(val);
   //   },
   // ]);
-  const cache1 = event.once('test3', function(val) {
-    console.log('5555');
-    console.log(val);
-  },);
+  const cache = event.once('test', [
+    function(key1, key2) {
+      // console.log('11111');
+      console.log(key1, key2);
+    },
+    function(key1) {
+      console.log(key1, '要被删掉');
+    },
+  ]);
+  const cache2 = event.on('test2', [
+    function(key1, key2) {
+      console.log('44444');
+    },
+    function(key1) {
+      console.log('55555');
+    },
+  ]);
   // console.log(event.removeEvent([ 'test2', cache2 ]));
   // console.log(event.removeEventFunction(cache));
 }.bind({
@@ -33,6 +49,5 @@ const test = function () {
 })
 
 test();
-event.emit([ 'test', 'test2' ], 22)
-event.emit('test2', 555)
+// event.emit('test2')
 event.emit('test3', 'once123')
