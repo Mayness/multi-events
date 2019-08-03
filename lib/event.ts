@@ -15,6 +15,7 @@ interface MultiEvents {
   constructor(): void;
   on(eventName: Array<string>, callback: Array<Function>): EventCache;
   emit(eventName: Array<string>, ...arg: Array<any>): void;
+  once(eventArray: Array<string>, callback: Array<Function>): EventCache;
   removeEvent(eventArray: Array<string>): Array<boolean> | boolean;
   removeEventFunction(id: Array<Symbol>): Array<boolean> | boolean;
 }
@@ -137,16 +138,16 @@ class MultiEvents {
   @formatRes()
   @formatReq()
   on(eventArray: Array<string>, callback: Array<Function>) {
+    this._eventsCount += callback.length * eventArray.length;
     return this._addEvent(eventArray, callback);
   }
 
-  private _addEvent(eventArray: Array<string>, callback: Array<Function>) {
-    this._eventsCount += callback.length * eventArray.length;
+  private _addEvent(eventArray: Array<string>, callback: Array<Function>, realSize?: number) {
     const cache: EventCache = {};
     for (const eventName of eventArray) {
       let fnArray = this._events[eventName] || [];
       const id = Symbol(eventName);
-      const sub = new EventSub(id, callback);
+      const sub = new EventSub(id, callback, realSize);
       fnArray.push(sub);
       this._events[eventName] = fnArray;
       cache[eventName] = id;
@@ -176,6 +177,7 @@ class MultiEvents {
   @formatRes()
   @formatReq()
   once(eventArray: Array<string>, callback: Array<Function>) {
+    this._eventsCount += callback.length * eventArray.length;
     let onceWrapArray = [];
     // 存储订阅事件的包裹对象，方便后面取到id
     let onceCache = [];
@@ -185,7 +187,7 @@ class MultiEvents {
       onceWrapArray.push(cb);
       onceCache.push(wrapObj);
     }
-    const cache = this._addEvent(eventArray, onceWrapArray);
+    const cache = this._addEvent(eventArray, onceWrapArray, callback.length);
     for (let item of onceCache) {
       if (cache[ item.eventName ]) {
         item.id = cache[ item.eventName ];

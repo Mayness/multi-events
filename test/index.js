@@ -27,7 +27,6 @@ const test = function () {
   // ]);
   const cache = event.once('test', [
     function(key1, key2) {
-      // console.log('11111');
       console.log(key1, key2);
     },
     function(key1) {
@@ -50,4 +49,6 @@ const test = function () {
 
 test();
 // event.emit('test2')
-event.emit('test3', 'once123')
+console.log(event._eventsCount);
+event.emit('test', 'once123')
+console.log(event._eventsCount);
