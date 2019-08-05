@@ -1,16 +1,18 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/",
+    "outDir": "./dist",
     "sourceMap": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "module": "commonjs",
     "target": "es2019",
-    "baseUrl": "./",
     "experimentalDecorators": true,
+    "baseUrl": "./",
     "paths": {
-      "@tps/*": ["types/*"],
+      "*": ["types/*"]
     }
   },
-  "include": ["./lib/**/*", "types/*", "lib/sub/sub.d.ts"]
+  "exclude": [
+    "node_modules"
+  ],
 }

@@ -1,29 +1,28 @@
 import EventSub from './sub';
 
 interface EventCache {
-  [propName: string]: Symbol;
+  [propName: string]: symbol;
 }
 
 interface _events {
-  [propName: string]: Array<EventSub>;
+  [propName: string]: EventSub[];
 }
-
 
 interface MultiEvents {
   _events: _events;
   _eventsCount: number;
   constructor(): void;
-  on(eventName: Array<string>, callback: Array<Function>): EventCache;
-  emit(eventName: Array<string>, ...arg: Array<any>): void;
-  once(eventArray: Array<string>, callback: Array<Function>): EventCache;
-  removeEvent(eventArray: Array<string>): Array<boolean> | boolean;
-  removeEventFunction(id: Array<Symbol>): Array<boolean> | boolean;
+  on(eventName: string[], callback: Function[]): EventCache;
+  emit(eventName: string[], ...arg: any[]): void;
+  once(eventArray: string[], callback: Function[]): EventCache;
+  removeEvent(eventArray: string[]): boolean[] | boolean;
+  removeEventFunction(id: symbol[]): boolean[] | boolean;
 }
 
 interface WrapObj {
-  id: Symbol,
-  cbArray: Array<Function>,
-  eventName: string,
+  id: symbol;
+  cbArray: Function[];
+  eventName: string;
 }
 
 /**
@@ -66,18 +65,19 @@ function formatRes(type: resType = resType.array, index: number = 0): MethodDeco
   return function(target: MultiEvents, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
     const fn = descriptor.value;
     descriptor.value = function() {
+      console.log(target);
       const value = arguments[index];
       const data = Reflect.apply(fn, this, arguments);
       if (!data) return;
       // 传入参数为Array，返回String 或者 传入参数数为Object，返回Symbol，则结果就只返回第1位（如果结果是对象则返回值的第1位），反之则全返回
-      const flag: boolean = type === resType.array && getType<String>(value, 'String') || type === resType.object && getType<Symbol>(value, 'Symbol')
-      return flag ? Array.isArray(data) ? data[ 0 ] : Object.values(data)[ 0 ] : data;
+      const flag: boolean = (type === resType.array && getType<string>(value, 'String')) || (type === resType.object && getType<symbol>(value, 'Symbol'));
+      return flag ? (Array.isArray(data) ? data[0] : Object.values(data)[0]) : data;
     };
     return descriptor;
   };
 }
 
-type idType = Array<Symbol> | EventCache | Symbol;
+type idType = symbol[] | EventCache | symbol;
 /**
  * 移除事件方法
  * @param {idType} ids
@@ -97,8 +97,9 @@ function removeEventFunctionCheck(target: MultiEvents, key: string, descriptor: 
   return descriptor;
 }
 
-function getSymbolDes(symbol: Symbol): string {
+function getSymbolDes(symbol: symbol): string {
   return symbol ? (symbol.description ? symbol.description : symbol.toString().replace(/^Symbol\((\S+)\)$/g, '$1')) : '';
+  // return symbol.toString().replace(/^Symbol\((\S+)\)$/g, '$1');
 }
 
 function getType<T>(s: any, type: string): s is T {
@@ -111,23 +112,21 @@ function getType<T>(s: any, type: string): s is T {
  * @return {Array<Symbol>}
  */
 
-function unwrapId(value: any): Array<Symbol> {
-  let arr: Array<Symbol> = [];
-  if (getType<Symbol>(value, 'Symbol')) {
+function unwrapId(value: any): symbol[] {
+  let arr: symbol[] = [];
+  if (getType<symbol>(value, 'Symbol')) {
     arr = [value];
   } else if (typeof value === 'object') {
     for (let i in value) {
       if (getType<EventCache>(value[i], 'Object')) {
         arr = arr.concat(unwrapId(value[i]));
-      } else  {
+      } else {
         arr.push(value[i]);
       }
     }
   }
   return arr;
 }
-
-
 
 class MultiEvents {
   constructor() {
@@ -137,12 +136,12 @@ class MultiEvents {
 
   @formatRes()
   @formatReq()
-  on(eventArray: Array<string>, callback: Array<Function>) {
+  on(eventArray: string[], callback: Function[]) {
     this._eventsCount += callback.length * eventArray.length;
     return this._addEvent(eventArray, callback);
   }
 
-  private _addEvent(eventArray: Array<string>, callback: Array<Function>, realSize?: number) {
+  private _addEvent(eventArray: string[], callback: Function[], realSize?: number) {
     const cache: EventCache = {};
     for (const eventName of eventArray) {
       let fnArray = this._events[eventName] || [];
@@ -151,19 +150,16 @@ class MultiEvents {
       fnArray.push(sub);
       this._events[eventName] = fnArray;
       cache[eventName] = id;
-      if (eventName !== 'newEventListener') {
-        this.emit([ 'newEventListener' ], eventName);
-      }
     }
     return cache;
   }
 
   @formatReq()
-  emit(eventArray: Array<string>, ...arg: Array<any>) {
-    this._emitEvent(eventArray, ...arg)
+  emit(eventArray: string[], ...arg: any[]) {
+    this._emitEvent(eventArray, ...arg);
   }
 
-  private _emitEvent(eventArray: Array<string>, ...arg: Array<any>) {
+  private _emitEvent(eventArray: string[], ...arg: any[]) {
     eventArray.forEach(eventName => {
       const cbList = this._events[eventName];
       if (cbList) {
@@ -176,33 +172,32 @@ class MultiEvents {
 
   @formatRes()
   @formatReq()
-  once(eventArray: Array<string>, callback: Array<Function>) {
+  once(eventArray: string[], callback: Function[]) {
     this._eventsCount += callback.length * eventArray.length;
     let onceWrapArray = [];
     // 存储订阅事件的包裹对象，方便后面取到id
     let onceCache = [];
     for (let item of eventArray) {
-      const wrapObj:WrapObj = { id: null, cbArray: callback, eventName: item };
+      const wrapObj: WrapObj = { id: null, cbArray: callback, eventName: item };
       const cb = onceWrap(item, wrapObj, this);
       onceWrapArray.push(cb);
       onceCache.push(wrapObj);
     }
     const cache = this._addEvent(eventArray, onceWrapArray, callback.length);
     for (let item of onceCache) {
-      if (cache[ item.eventName ]) {
-        item.id = cache[ item.eventName ];
+      if (cache[item.eventName]) {
+        item.id = cache[item.eventName];
       }
     }
     return cache;
   }
 
-
   @formatRes()
   @formatReq(false)
-  removeEvent(eventArray: Array<string>) {
-    const cache: Array<boolean> = [];
+  removeEvent(eventArray: string[]) {
+    const cache: boolean[] = [];
     for (const eventName of eventArray) {
-      let flag: boolean = false;
+      let flag = false;
       const fnArray = this._events[eventName];
       if (fnArray) {
         const num = fnArray.reduce((total, curr) => {
@@ -219,13 +214,13 @@ class MultiEvents {
 
   @formatRes(resType.object)
   @removeEventFunctionCheck
-  removeEventFunction(ids: Array<Symbol>) {
-    const cache: Array<boolean> = [];
-    let removeNum: number = 0;
+  removeEventFunction(ids: symbol[]) {
+    const cache: boolean[] = [];
+    let removeNum = 0;
     for (const id of ids) {
       const eventName = getSymbolDes(id);
       const fnArray = this._events[eventName];
-      let flag: boolean = false;
+      let flag = false;
       if (fnArray) {
         const index = fnArray.findIndex(item => {
           if (item.id === id) {
@@ -247,14 +242,13 @@ class MultiEvents {
   }
 }
 
-
-function onceWrap(eventArray: string, obj: any, target: MultiEvents):Function {
+function onceWrap(eventArray: string, obj: any, target: MultiEvents): Function {
   return function() {
-    target.removeEventFunction([ obj.id ])
+    target.removeEventFunction([obj.id]);
     for (let fn of obj.cbArray) {
       Reflect.apply(fn, target, arguments);
     }
-  }
+  };
 }
 
-module.exports = MultiEvents;
+module.exports = MultiEvents

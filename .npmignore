@@ -1,5 +1,6 @@
 .history
 .node_modules
 .vscode
-dist
+.rpt2_cache
+lib
 test
