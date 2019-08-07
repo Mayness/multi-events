@@ -11,7 +11,8 @@ node_js:
   - '8'
 
 install:
-  - npm install
+  - npm i -g typescript
+  - npm i
 
 script:
   - npm run build
