@@ -6,7 +6,8 @@
   "types": "types/event.d.ts",
   "jest": {
     "verbose": true,
-    "browser": true
+    "browser": true,
+    "collectCoverage": true
   },
   "keywords": [
     "events",
