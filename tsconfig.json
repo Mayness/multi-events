@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "module": "commonjs",
+    "target": "es2019",
+    "experimentalDecorators": true,
+    "baseUrl": "./",
+    "paths": {
+      "*": ["types/*"]
+    }
+  },
+  "exclude": [
+    "node_modules"
+  ],
+}

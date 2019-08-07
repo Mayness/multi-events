@@ -1,19 +1,38 @@
 {
-  "name": "easy-events",
-  "version": "1.0.0",
+  "name": "multi-events",
+  "version": "1.0.2",
   "description": "",
-  "main": "index.js",
+  "main": "/dist/event.js",
+  "types": "types/event.d.ts",
+  "jest": {
+    "verbose": true,
+    "browser": true,
+    "collectCoverage": true
+  },
+  "keywords": [
+    "events",
+    "multi",
+    "multi-events"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "test": "rimraf coverage && jest"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Mayness/easy-events.git"
+    "url": "git+https://github.com/Mayness/multi-events.git"
   },
   "author": "mayness",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Mayness/easy-events/issues"
+    "url": "https://github.com/Mayness/multi-events/issues"
   },
-  "homepage": "https://github.com/Mayness/easy-events#readme"
+  "homepage": "https://github.com/Mayness/multi-events#readme",
+  "devDependencies": {
+    "jest": "^24.8.0",
+    "rimraf": "^2.6.3"
+  },
+  "dependencies": {
+    "@types/node": "^12.6.9"
+  }
 }
