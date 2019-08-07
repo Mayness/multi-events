@@ -25,9 +25,15 @@ interface WrapObj {
   eventName: string;
 }
 
-function onEventCheck(target: MultiEvents, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+/** 内部方法解释
+ * @description: on方法参数转换，需要同时转换订阅事件和方法
+ * @param {string[] | string} eventName 订阅名称，需要转换为数组
+ * @param {Function[] | Function} callback 订阅事件，需要转换为数组
+ * @return: 改写descriptor
+ */
+function triggerEventReq(target: MultiEvents, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
   const fn = descriptor.value;
-  descriptor.value = function(eventName: Array<string> | string, callback: Array<Function> | Function) {
+  descriptor.value = function(eventName: string[] | string, callback: Function[] | Function) {
     if (callback) {
       if (typeof callback === 'function') {
         callback = [callback];
@@ -120,19 +126,30 @@ function removeEventFunctionCheck(target: MultiEvents, key: string, descriptor: 
   return descriptor;
 }
 
+/**
+ * @description: 获取Symbol名称
+ * @param {symbol} symbol symbol唯一标识
+ * @return: string
+ */
 function getSymbolDes(symbol: symbol): string {
   return symbol ? (symbol.description ? symbol.description : symbol.toString().replace(/^Symbol\((\S+)\)$/g, '$1')) : '';
   // return symbol.toString().replace(/^Symbol\((\S+)\)$/g, '$1');
 }
 
+/**
+ * @description: ts获取类型
+ * @param {any} s 判断字段
+ * @param {string} type 期望的类型
+ * @return: 判断是否是该类型
+ */
 function getType<T>(s: any, type: string): s is T {
   return Object.prototype.toString.call(s).replace(/^\[object (\S+)\]/g, '$1') === type;
 }
 
 /**
  * @description: 转换参数 [{prop: Symbol}]、{prop:Symbol}、Symbol => [ Symbol ]
- * @param {idType}
- * @return {Array<Symbol>}
+ * @param {idType} value
+ * @return {Symbol【】}
  */
 
 function unwrapId(value: any): symbol[] {
@@ -158,7 +175,7 @@ class MultiEvents {
   }
 
   @formatRes()
-  @onEventCheck
+  @triggerEventReq
   on(eventArray: string[], callback: Function[]) {
     this._eventsCount += callback.length * eventArray.length;
     return this._addEvent(eventArray, callback);
@@ -194,23 +211,16 @@ class MultiEvents {
   }
 
   @formatRes()
-  @formatReq()
+  @triggerEventReq
   once(eventArray: string[], callback: Function[]) {
     this._eventsCount += callback.length * eventArray.length;
-    let onceWrapArray = [];
-    // 存储订阅事件的包裹对象，方便后面取到id
-    let onceCache = [];
+    const cache = {};
     for (let item of eventArray) {
       const wrapObj: WrapObj = { id: null, cbArray: callback, eventName: item };
       const cb = onceWrap(item, wrapObj, this);
-      onceWrapArray.push(cb);
-      onceCache.push(wrapObj);
-    }
-    const cache = this._addEvent(eventArray, onceWrapArray, callback.length);
-    for (let item of onceCache) {
-      if (cache[item.eventName]) {
-        item.id = cache[item.eventName];
-      }
+      const cacheItem = this._addEvent([ item ], [ cb ], callback.length);
+      wrapObj.id = cacheItem[ item ];
+      Object.assign(cache, cacheItem);
     }
     return cache;
   }

@@ -8,22 +8,28 @@
     "verbose": true,
     "browser": true
   },
+  "keywords": [
+    "events",
+    "multi",
+    "multi-events"
+  ],
   "scripts": {
-    "test": "jest",
-    "build": "node node_modules/rollup/bin/rollup -c"
+    "build": "tsc",
+    "test": "rimraf coverage && jest"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Mayness/multi-events.git"
   },
   "author": "mayness",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Mayness/multi-events/issues"
   },
   "homepage": "https://github.com/Mayness/multi-events#readme",
   "devDependencies": {
-    "jest": "^24.8.0"
+    "jest": "^24.8.0",
+    "rimraf": "^2.6.3"
   },
   "dependencies": {
     "@types/node": "^12.6.9"

@@ -1,5 +1,17 @@
 # multi-events
 
+[![NPM version][npm-image]][npm-url]
+[![build status][travis-image]][travis-url]
+[![Test coverage][codecov-image]][codecov-url]
+
+[npm-image]: https://img.shields.io/npm/v/multi-events.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/multi-events
+[travis-image]: https://img.shields.io/travis/Mayness/multi-events.svg
+[travis-url]: https://travis-ci.org/Mayness/multi-events
+[codecov-image]: https://img.shields.io/codecov/c/github/Mayness/multi-events.svg?style=flat-square
+[codecov-url]: https://codecov.io/github/Mayness/multi-events?branch=master
+
+
 触发多个事件  
 event.emit(event, params)  
 event.emit([ 'event1', 'event2' ], params)  
