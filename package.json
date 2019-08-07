@@ -6,7 +6,7 @@
   "types": "types/event.d.ts",
   "jest": {
     "verbose": true,
-    "browser": false
+    "browser": true
   },
   "scripts": {
     "test": "jest",

@@ -25,6 +25,30 @@ interface WrapObj {
   eventName: string;
 }
 
+function onEventCheck(target: MultiEvents, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+  const fn = descriptor.value;
+  descriptor.value = function(eventName: Array<string> | string, callback: Array<Function> | Function) {
+    if (callback) {
+      if (typeof callback === 'function') {
+        callback = [callback];
+      } else if (Array.isArray(callback)) {
+        callback.forEach(fn => {
+          if (typeof fn !== 'function') {
+            throw Error('parameter Error');
+          }
+        });
+      } else {
+        throw Error('parameter Error');
+      }
+    } else {
+      throw Error('Missing necessary parameters');
+    }
+    const eventArray = Array.isArray(eventName) ? Array.from(new Set(eventName)) : [eventName];
+    return Reflect.apply(fn, this, [ eventArray, callback ]);
+  };
+  return descriptor;
+}
+
 /**
  * @description: 通用格式化传入参数方法
  * @param {boolean} disRepeat 为指定参数去重去重，默认true
@@ -65,7 +89,6 @@ function formatRes(type: resType = resType.array, index: number = 0): MethodDeco
   return function(target: MultiEvents, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
     const fn = descriptor.value;
     descriptor.value = function() {
-      console.log(target);
       const value = arguments[index];
       const data = Reflect.apply(fn, this, arguments);
       if (!data) return;
@@ -135,7 +158,7 @@ class MultiEvents {
   }
 
   @formatRes()
-  @formatReq()
+  @onEventCheck
   on(eventArray: string[], callback: Function[]) {
     this._eventsCount += callback.length * eventArray.length;
     return this._addEvent(eventArray, callback);
