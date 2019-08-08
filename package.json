@@ -16,7 +16,8 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "test": "rimraf coverage && jest && codecov"
+    "test": "rimraf coverage && jest",
+    "coverage": "codecov -f coverage/coverage-final.json"
   },
   "repository": {
     "type": "git",
@@ -30,6 +31,7 @@
   "homepage": "https://github.com/Mayness/multi-events#readme",
   "devDependencies": {
     "@types/node": "^12.6.9",
+    "codecov": "^3.5.0",
     "jest": "^24.8.0",
     "rimraf": "^2.6.3",
     "rollup": "^1.19.4",

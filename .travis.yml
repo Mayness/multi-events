@@ -11,14 +11,15 @@ node_js:
   - '8'
 
 install:
-  - npm i -g codecov typescript
+  - npm i -g typescript
   - npm i
 
 script:
   - npm run build
+  - npm run test
 
 after_success:
-  - npm run test
+  - npm run coverage
 
 stages:
  - deploy
