@@ -1,8 +1,8 @@
 {
   "name": "multi-events",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "A multiple events tool",
-  "main": "/dist/event.js",
+  "main": "/dist/muti-events.js",
   "types": "types/event.d.ts",
   "jest": {
     "verbose": true,
