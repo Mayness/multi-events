@@ -27,4 +27,5 @@ class EventSub {
     });
   }
 }
+
 export default EventSub;
