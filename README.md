@@ -23,8 +23,8 @@ const id3 = event.on([ 'event1', 'event2' ], [fn1, fn2]); // {   event1: Symbol(
 const id4;
 
 卸载监听事件  
-event.removeEvent('event');  // true or false
-event.removeEvent([ 'event1', 'event2' ]);  // [ true, true ]
+event.removeEvent('event');  // true or false  
+event.removeEvent([ 'event1', 'event2' ]);  // [ true, true ]  
 
 卸载触发方法  
 event.removeEventFunction(id1);  // 移除整个id1.event1、id1.event2监听事件  返回[ true, true ]，内部会解析为event.removeEventFunction([ id1.event1, id1.event2 ])  
