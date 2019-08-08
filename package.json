@@ -1,6 +1,6 @@
 {
   "name": "multi-events",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "/dist/event.js",
   "types": "types/event.d.ts",
@@ -15,7 +15,7 @@
     "multi-events"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rollup -c",
     "test": "rimraf coverage && jest"
   },
   "repository": {
@@ -29,10 +29,12 @@
   },
   "homepage": "https://github.com/Mayness/multi-events#readme",
   "devDependencies": {
+    "@types/node": "^12.6.9",
     "jest": "^24.8.0",
-    "rimraf": "^2.6.3"
-  },
-  "dependencies": {
-    "@types/node": "^12.6.9"
+    "rimraf": "^2.6.3",
+    "rollup": "^1.19.4",
+    "rollup-plugin-buble": "^0.19.8",
+    "rollup-plugin-typescript2": "^0.22.1",
+    "typescript": "^3.5.3"
   }
 }

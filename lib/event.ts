@@ -149,7 +149,7 @@ function getType<T>(s: any, type: string): s is T {
 /**
  * @description: 转换参数 [{prop: Symbol}]、{prop:Symbol}、Symbol => [ Symbol ]
  * @param {idType} value
- * @return {Symbol【】}
+ * @return {Symbol[]}
  */
 
 function unwrapId(value: any): symbol[] {
