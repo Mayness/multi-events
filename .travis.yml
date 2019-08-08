@@ -16,9 +16,9 @@ install:
 
 script:
   - npm run build
+  - npm run test
 
 after_success:
-  - npm run test
   - npm run coverage
 
 stages:
