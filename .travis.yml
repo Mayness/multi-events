@@ -19,7 +19,7 @@ script:
 
 after_success:
   - npm run test
-  - codecov --token $CODECOV_TOKEN
+  - codecov --token ${CODECOV_TOKEN}
 
 stages:
  - deploy
