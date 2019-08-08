@@ -16,7 +16,8 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "test": "rimraf coverage && jest"
+    "test": "rimraf coverage && jest",
+    "coverage": "codecov -f coverage/coverage-final.json"
   },
   "repository": {
     "type": "git",
