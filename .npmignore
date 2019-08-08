@@ -2,5 +2,8 @@
 .node_modules
 .vscode
 .rpt2_cache
+.travis.yml
+coverage
+rollup.config.js
 lib
 test
