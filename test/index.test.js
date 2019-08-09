@@ -102,7 +102,7 @@ describe('test multi-event', () => {
   })
 
   test('test remove all subscription in the event name', () => {
-    const onRes_A = event.on([ 'event1', 'event2', 'event3' ], [
+    event.on([ 'event1', 'event2', 'event3' ], [
       mockCallback_A,
       mockCallback_B,
     ]);
