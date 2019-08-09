@@ -1,6 +1,6 @@
 {
   "name": "multi-events",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "A multiple events tool",
   "main": "/dist/muti-events.js",
   "types": "types/event.d.ts",

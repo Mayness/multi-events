@@ -1,6 +1,6 @@
 .history
 .vscode
 .rpt2_cache
-# dist
+dist
 node_modules
 coverage
