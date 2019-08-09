@@ -12,6 +12,7 @@
 [codecov-url]: https://codecov.io/github/Mayness/multi-events?branch=master
 
 
+
 触发多个事件  
 event.emit(event, params)  
 event.emit([ 'event1', 'event2' ], params)  

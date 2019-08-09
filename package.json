@@ -17,7 +17,8 @@
   "scripts": {
     "build": "rollup -c",
     "test": "rimraf coverage && jest",
-    "coverage": "codecov -f ./coverage/coverage-final.json"
+    "coverage": "codecov -f coverage/*.json",
+    "local": "export CODECOV_TOKEN=d91d71bd-d5af-4c06-b65e-7c18bdd6f469 && codecov -f coverage/coverage-final.json"
   },
   "repository": {
     "type": "git",
