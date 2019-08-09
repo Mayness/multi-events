@@ -11,7 +11,7 @@ node_js:
   - '8'
 
 install:
-  - npm i -g typescript
+  - npm i -g typescript codecov
   - npm i
 
 script:
