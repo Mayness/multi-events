@@ -1,4 +1,4 @@
-const MultiEvent = require('../dist/muti-events.js');
+const MultiEvent = require('../lib/event.ts');
 
 describe('test multi-event', () => {
   let event;
