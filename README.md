@@ -16,9 +16,10 @@
 用来处理多个订阅事件和方法的订阅发布模块
 
 # 安装
+npm -S install multi-events
+
 [![NPM](https://nodei.co/npm/multi-events.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/multi-events/)
 
-npm -S install multi-events
 
 # 用法
 ## 初始化
@@ -53,7 +54,7 @@ const id3 = event.on([ 'event1', 'event2' ], [fn1, fn2]); // {   event1: Symbol(
 
 ## removeEvent
 卸载当前订阅事件的所有方法，传入订阅事件名  
-如果仅仅是需要移除某个方法时候，可以考虑用removeEventFunction方法  
+如果仅仅是需要移除某个方法时候，可以考虑用<a href="#removeeventfunction ">removeEventFunction</a>方法  
 
 ```javascript
 event.removeEvent('event');  // true or false  
