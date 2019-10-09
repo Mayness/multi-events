@@ -24,7 +24,7 @@ npm -S install multi-events
 # 用法
 ## 初始化
 ```javascript
-const MultiEvent = require('../lib/event.ts');
+const MultiEvent = require('multi-events');
 
 const event = new MultiEvent();
 ```

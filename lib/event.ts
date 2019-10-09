@@ -40,11 +40,11 @@ function triggerEventReq(target: MultiEvents, key: string, descriptor: PropertyD
       } else if (Array.isArray(callback)) {
         callback.forEach(fn => {
           if (typeof fn !== 'function') {
-            throw Error('parameter Error');
+            throw Error('single callback parameter type error:' + fn);
           }
         });
       } else {
-        throw Error('parameter Error');
+        throw Error('callback parameter type error:' + callback);
       }
     } else {
       throw Error('Missing necessary parameters');
@@ -73,7 +73,7 @@ function formatReq(disRepeat: boolean = true, index: number = 0): MethodDecorato
           arguments[0] = Array.from(new Set(param));
         }
       } else {
-        throw Error('parameter Error');
+        throw Error('parameter type error:' + param);
       }
       return Reflect.apply(fn, this, arguments);
     };
@@ -120,7 +120,7 @@ function removeEventFunctionCheck(target: MultiEvents, key: string, descriptor: 
     if (arr.length) {
       return Reflect.apply(fn, this, [arr]);
     } else {
-      throw Error('parameter Error');
+      throw Error('not fount events id:' + arr);
     }
   };
   return descriptor;
