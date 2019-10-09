@@ -58,7 +58,7 @@ describe('test multi-event', () => {
     function wrongFunction() {
       event.on('event3', [ 'not function' ])
     }
-    expect(wrongFunction).toThrow('parameter Error');
+    expect(wrongFunction).toThrow('single callback parameter type error:not function');
   })
 
   test('test once emit event', () => {
