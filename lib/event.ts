@@ -4,12 +4,10 @@ interface EventCache {
   [propName: string]: symbol;
 }
 
-interface _events {
-  [propName: string]: EventSub[];
-}
+type eventsMap = Map<string, EventSub[]>;
 
 interface MultiEvents {
-  _events: _events;
+  _events: eventsMap;
   _eventsCount: number;
   constructor(): void;
   on(eventName: string[], callback: Function[]): EventCache;
@@ -167,10 +165,9 @@ function unwrapId(value: any): symbol[] {
   }
   return arr;
 }
-
 class MultiEvents {
   constructor() {
-    this._events = Object.create({});
+    this._events = new Map();
     this._eventsCount = 0;
   }
 
@@ -184,11 +181,11 @@ class MultiEvents {
   private _addEvent(eventArray: string[], callback: Function[], realSize?: number) {
     const cache: EventCache = {};
     for (const eventName of eventArray) {
-      let fnArray = this._events[eventName] || [];
+      let fnArray = this._events.get(eventName) || [];
       const id = Symbol(eventName);
       const sub = new EventSub(id, callback, realSize);
       fnArray.push(sub);
-      this._events[eventName] = fnArray;
+      this._events.set(eventName, fnArray);
       cache[eventName] = id;
     }
     return cache;
@@ -201,7 +198,7 @@ class MultiEvents {
 
   private _emitEvent(eventArray: string[], ...arg: any[]) {
     eventArray.forEach(eventName => {
-      const cbList = this._events[eventName];
+      const cbList = this._events.get(eventName);
       if (cbList) {
         cbList.forEach(item => {
           item.applyFunction(arg);
@@ -231,14 +228,13 @@ class MultiEvents {
     const cache: boolean[] = [];
     for (const eventName of eventArray) {
       let flag = false;
-      const fnArray = this._events[eventName];
+      const fnArray = this._events.get(eventName);
       if (fnArray) {
         const num = fnArray.reduce((total, curr) => {
           return (total += curr.size);
         }, 0);
-        this._eventsCount -= num;
-        delete this._events[eventName];
-        flag = true;
+        flag = this._events.delete(eventName);
+        if (flag) this._eventsCount -= num;
       }
       cache.push(flag);
     }
@@ -252,7 +248,7 @@ class MultiEvents {
     let removeNum = 0;
     for (const id of ids) {
       const eventName = getSymbolDes(id);
-      const fnArray = this._events[eventName];
+      const fnArray = this._events.get(eventName);
       let flag = false;
       if (fnArray) {
         const index = fnArray.findIndex(item => {
@@ -265,7 +261,7 @@ class MultiEvents {
           flag = true;
           fnArray.splice(index, 1);
           // 如果当前监听队列为空，则删除当前监听对象
-          if (!fnArray.length) delete this._events[eventName];
+          if (!fnArray.length) this._events.delete(eventName);
         }
       }
       cache.push(flag);
