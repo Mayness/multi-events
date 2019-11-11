@@ -77,7 +77,7 @@ describe('test multi-event', () => {
       mockCallback_B,
     ]);
     const remove_A = event.removeEventFunction(onRes_A);
-    expect(event._events).toEqual({});
+    expect(event._events.size).toBe(0);
     expect(event._eventsCount).toBe(0);
     expect(remove_A).toEqual([true, true]);
     const onRes_B = event.on([ 'event1', 'event2' ], mockCallback_A);
@@ -94,7 +94,7 @@ describe('test multi-event', () => {
     const onRes_F = event.on('event4', mockCallback_A);
     const remove_E = event.removeEventFunction([ onRes_F, onRes_E.event1, 'string' ]);
     expect(remove_E).toEqual([ true, true, false ]);
-    expect(event._events.event2).toBeDefined();
+    expect(event._events.get('event2')).toBeDefined();
     expect(event._eventsCount).toBe(1);
     const remove_F = event.removeEventFunction(onRes_E);
     expect(remove_F).toEqual([ false, true ]);
