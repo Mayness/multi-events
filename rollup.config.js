@@ -1,5 +1,6 @@
 import rollupTypescript from 'rollup-plugin-typescript2';
-import buble from 'rollup-plugin-buble';
+import commonjs from 'rollup-plugin-commonjs';
+import babel from 'rollup-plugin-babel';
 
 export default {
   input: 'lib/event.ts',
@@ -10,8 +11,10 @@ export default {
   },
   plugins: [
     rollupTypescript(),
-    buble({
-      transforms: { forOf: false }
+    commonjs(),
+    babel({
+      extensions: [ 'js', 'ts' ],
+      exclude: 'node_modules/**'
     }),
   ]
 };

@@ -18,7 +18,7 @@ class EventSub {
   constructor(id: symbol, fnArray: Function[], realSize?: number) {
     this.id = id;
     this.fnArray = fnArray;
-    this.size = realSize ? realSize : fnArray.length;
+    this.size = realSize || fnArray.length;
   }
   applyFunction() {
     const arg = arguments[0];

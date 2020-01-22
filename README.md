@@ -16,7 +16,7 @@
 用来处理多个订阅事件和方法的订阅发布模块
 
 # 安装
-npm -S install multi-events
+npm install multi-events
 
 [![NPM](https://nodei.co/npm/multi-events.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/multi-events/)
 

@@ -82,7 +82,7 @@ function formatReq(disRepeat: boolean = true, index: number = 0): MethodDecorato
 /**
  * @description: 通用格式化返回参数，传入参数是什么格式就返回什么格式
  * @param {resType} type 限定传入的数据类型，默认是array
- * @param {number} index 需要格式化参数的小标，默认是第一个参数
+ * @param {number} index 需要格式化参数的下标，默认是第一个参数
  * @return: {MethodDecorator} 方法装饰器，内部触发格式化后的返回值
  */
 enum resType {
