@@ -9,7 +9,6 @@ describe('test multi-event', () => {
     mockCallback_A = jest.fn();
     mockCallback_B = jest.fn();
   })
-
   test('test addEventListener', () => {
     const res_A = event.on('event1', mockCallback_A);
     event.emit('event1', 'aaa');
@@ -114,4 +113,17 @@ describe('test multi-event', () => {
     expect(remove_B).toEqual([true, false]);
   })
 
+  test('test trigger and remove hook', () => {
+    const onRes_A = event.on([ 'event1', 'event2' ], () => {});
+    event.on('trigger', mockCallback_A)
+    event.emit([ 'event1', 'event2' ])
+    expect(mockCallback_A.mock.calls.length).toBe(2);
+    expect(mockCallback_A.mock.calls).toEqual([[ 'event1' ],[ 'event2' ]]);
+
+    event.on('remove', mockCallback_B);
+    event.removeEvent('event1');
+    expect(mockCallback_B.mock.calls).toEqual([[ 'event1', []]]);
+    event.removeEventFunction(onRes_A);
+    expect(mockCallback_B.mock.calls).toEqual([[ 'event1', []], [ 'event2', []]]);
+  })
 });

@@ -26,9 +26,12 @@ npm install multi-events
 ```javascript
 const MultiEvent = require('multi-events');
 
-const event = new MultiEvent();
+const event = new MultiEvent(option);
 ```
+# option
+修改默认event别名对象，可以不传递参数，按照默认配置。<a href="#event">详情</a>
 
+# 方法
 ## emit 
 触发单个或多个订阅事件  
 第一个参数是订阅事件名，当是多个事件订阅时，可以传入数组。  
@@ -70,4 +73,27 @@ event.removeEventFunction([ id1 ]);  // 返回[ true, true ]，和上面表示�
 event.removeEventFunction([ id1, id2, 'undefined' ]);  // 返回[ true, true, false ]  
 event.removeEventFunction([ id1.event1, id2 ]);  // 只用传id2即可，因为本身就是symbol类型，返回 [ true, true ]  
 event.removeEventFunction([ id1.event1, id3.event1 ]);  // 返回[ true, true ]  
+```
+
+# event  
+通过emit函数调用，和普通订阅事件用法一致。
+|名称|场景|callback|
+|:-:|:-:|:-:|  
+|trigger|当触发emit的时候触发，相同的事件只会触发一次|Function(eventName)
+|remove|当事件或方法被移除的时候触发，包括：removeEvent，removeEventFunction|Function(eventName, [ EventSub ])
+
+可以通过在初始化的`MultiEvent`类的时候修改这些字段，例如：  
+```javascript
+const event = new MultiEvent({
+  trigger: 'emitFn'
+})
+event.on('myEvent', () => {
+    console.log(1);
+})
+
+event.on('emitFn', eventName => {
+  console.log(eventName); // myEvent
+})
+
+event.emit('myEvent');
 ```

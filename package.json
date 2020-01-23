@@ -1,6 +1,6 @@
 {
   "name": "multi-events",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A multiple events tool",
   "main": "/dist/muti-events.js",
   "types": "types/event.d.ts",
@@ -51,7 +51,7 @@
     "rollup": "^1.19.4",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-typescript2": "^0.22.1",
+    "rollup-plugin-typescript2": "^0.25.3",
     "ts-jest": "^24.0.2",
     "typescript": "^3.7.5"
   },

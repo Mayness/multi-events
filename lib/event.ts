@@ -4,11 +4,17 @@ interface EventCache {
   [propName: string]: symbol;
 }
 
+interface Option {
+  trigger: string;
+  remove: string;
+}
+
 type eventsMap = Map<string, EventSub[]>;
 
 interface MultiEvents {
   _events: eventsMap;
   _eventsCount: number;
+  _option: Option;
   constructor(): void;
   on(eventName: string[], callback: Function[]): EventCache;
   emit(eventName: string[], ...arg: any[]): void;
@@ -45,7 +51,7 @@ function triggerEventReq(target: MultiEvents, key: string, descriptor: PropertyD
         throw Error('callback parameter type error:' + callback);
       }
     } else {
-      throw Error('Missing necessary parameters');
+      throw Error('Missing necessary parameters:' + eventName);
     }
     const eventArray = Array.isArray(eventName) ? Array.from(new Set(eventName)) : [eventName];
     return Reflect.apply(fn, this, [ eventArray, callback ]);
@@ -57,7 +63,7 @@ function triggerEventReq(target: MultiEvents, key: string, descriptor: PropertyD
  * @description: 通用格式化传入参数方法
  * @param {boolean} disRepeat 为指定参数去重去重，默认true
  * @param {number} index 需要格式化参数的小标，默认是第一个参数
- * @return {MethodDecorator} 方法装饰器，内部触发格式化后的参数
+ * @return {MethodDecorator} 方法装饰器，内部触发格式化后的数组参数
  */
 function formatReq(disRepeat: boolean = true, index: number = 0): MethodDecorator {
   return function(target: MultiEvents, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
@@ -166,9 +172,13 @@ function unwrapId(value: any): symbol[] {
   return arr;
 }
 class MultiEvents {
-  constructor() {
+  constructor(option: Option) {
     this._events = new Map();
     this._eventsCount = 0;
+    this._option = {
+      trigger: option?.trigger || 'trigger',
+      remove: option?.remove || 'remove'
+    };
   }
 
   @formatRes()
@@ -197,12 +207,14 @@ class MultiEvents {
   }
 
   private _emitEvent(eventArray: string[], ...arg: any[]) {
+    const aliseKey = Object.values(this._option);
     eventArray.forEach(eventName => {
       const cbList = this._events.get(eventName);
       if (cbList) {
         cbList.forEach(item => {
           item.applyFunction(arg);
         });
+        if (aliseKey.indexOf(eventName) === -1) this.emit([ this._option.trigger ], eventName)
       }
     });
   }
@@ -228,14 +240,21 @@ class MultiEvents {
     const cache: boolean[] = [];
     for (const eventName of eventArray) {
       let flag = false;
-      const fnArray = this._events.get(eventName);
-      if (fnArray) {
-        const num = fnArray.reduce((total, curr) => {
-          return (total += curr.size);
-        }, 0);
-        flag = this._events.delete(eventName);
-        if (flag) this._eventsCount -= num;
-      }
+      if (Object.values(this._option).indexOf(eventName) === -1) {
+        const fnArray = this._events.get(eventName);
+        if (fnArray) {
+          const num = fnArray.reduce((total, curr) => {
+            return (total += curr.size);
+          }, 0);
+          flag = this._events.delete(eventName);
+          if (flag) {
+            this._eventsCount -= num
+            this.emit([ this._option.remove ], eventName, []);
+          };
+        }
+      } else {
+        console.warn(`multi-events: Don’t remove hook event: '${eventName}', maybe you could alias the hook event at initialization time`)
+      };
       cache.push(flag);
     }
     return cache;
@@ -248,22 +267,27 @@ class MultiEvents {
     let removeNum = 0;
     for (const id of ids) {
       const eventName = getSymbolDes(id);
-      const fnArray = this._events.get(eventName);
       let flag = false;
-      if (fnArray) {
-        const index = fnArray.findIndex(item => {
-          if (item.id === id) {
-            removeNum += item.size;
-            return true;
+      const fnArray = this._events.get(eventName);
+      if (Object.values(this._option).indexOf(eventName) === -1) {
+        if (fnArray) {
+          const index = fnArray.findIndex(item => {
+            if (item.id === id) {
+              removeNum += item.size;
+              return true;
+            }
+          });
+          if (index >= 0) {
+            flag = true;
+            fnArray.splice(index, 1);
+            this.emit([ this._option.remove ], eventName, fnArray);
+            // 如果当前监听队列为空，则删除当前监听对象
+            if (!fnArray.length) this._events.delete(eventName);
           }
-        });
-        if (index >= 0) {
-          flag = true;
-          fnArray.splice(index, 1);
-          // 如果当前监听队列为空，则删除当前监听对象
-          if (!fnArray.length) this._events.delete(eventName);
         }
-      }
+      } else {
+        console.warn(`multi-events: Don’t remove hook event: '${eventName}', maybe you could alias the hook event at initialization time`)
+      };
       cache.push(flag);
     }
     this._eventsCount -= removeNum;
@@ -279,5 +303,6 @@ function onceWrap(eventArray: string, obj: any, target: MultiEvents): Function {
     }
   };
 }
+
 
 module.exports = MultiEvents
