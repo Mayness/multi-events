@@ -30,6 +30,7 @@ jobs:
   include:
     - stage: deploy
       deploy:
+        edge: true
         provider: npm
         email: "${MY_EMAIL}"
         api_key: "${NPM_TOKEN}"
