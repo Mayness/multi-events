@@ -29,7 +29,7 @@ const MultiEvent = require('multi-events');
 const event = new MultiEvent(option);
 ```
 # option
-修改默认event别名对象，可以不传递参数，按照默认配置。<a href="#event">详情</a>
+修改默认event别名对象，可以不传递参数，按照默认配置。<a href="#event">详情</a>
 
 # 方法
 ## emit 
