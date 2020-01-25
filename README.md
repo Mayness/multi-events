@@ -79,7 +79,7 @@ event.removeEventFunction([ id1.event1, id3.event1 ]);  // 返回[ true, true ]
 通过emit函数调用，和普通订阅事件用法一致。
 |名称|场景|callback|
 |:-:|:-:|:-:|  
-|trigger|当触发emit的时候触发，相同的事件只会触发一次|Function(eventName)
+|trigger|当触发emit的时候触发，相同的事件只会触发一次|Function(eventName, triggerParams)
 |remove|当事件或方法被移除的时候触发，包括：removeEvent，removeEventFunction|Function(eventName, [ EventSub ])
 
 可以通过在初始化的`MultiEvent`类的时候修改这些字段，例如：  
@@ -91,9 +91,9 @@ event.on('myEvent', () => {
     console.log(1);
 })
 
-event.on('emitFn', eventName => {
-  console.log(eventName); // myEvent
+event.on('emitFn', (eventName, params) => {
+  console.log(eventName, params); // myEvent, [ 'params1' ]
 })
 
-event.emit('myEvent');
+event.emit('myEvent', 'params1');
 ```

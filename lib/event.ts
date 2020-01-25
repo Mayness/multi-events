@@ -209,12 +209,13 @@ class MultiEvents {
   private _emitEvent(eventArray: string[], ...arg: any[]) {
     const aliseKey = Object.values(this._option);
     eventArray.forEach(eventName => {
+      console.log(arg);
+      if (aliseKey.indexOf(eventName) === -1) this.emit([ this._option.trigger ], eventName, arg)
       const cbList = this._events.get(eventName);
       if (cbList) {
         cbList.forEach(item => {
           item.applyFunction(arg);
         });
-        if (aliseKey.indexOf(eventName) === -1) this.emit([ this._option.trigger ], eventName)
       }
     });
   }

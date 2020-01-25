@@ -116,9 +116,9 @@ describe('test multi-event', () => {
   test('test trigger and remove hook', () => {
     const onRes_A = event.on([ 'event1', 'event2' ], () => {});
     event.on('trigger', mockCallback_A)
-    event.emit([ 'event1', 'event2' ])
+    event.emit([ 'event1', 'event2' ], 'paramsA', 'paramsB')
     expect(mockCallback_A.mock.calls.length).toBe(2);
-    expect(mockCallback_A.mock.calls).toEqual([[ 'event1' ],[ 'event2' ]]);
+    expect(mockCallback_A.mock.calls).toEqual([[ 'event1', [ 'paramsA', 'paramsB' ] ],[ 'event2', [ 'paramsA', 'paramsB' ] ]]);
 
     event.on('remove', mockCallback_B);
     event.removeEvent('event1');
