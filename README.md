@@ -76,11 +76,12 @@ event.removeEventFunction([ id1.event1, id3.event1 ]);  // 返回[ true, true ]
 ```
 
 # event  
-通过emit函数调用，和普通订阅事件用法一致。
+通过emit函数调用，和普通订阅事件用法一致。  
+
 |名称|场景|callback|
 |:-:|:-:|:-:|  
 |trigger|当触发emit的时候触发，相同的事件只会触发一次|Function(eventName, triggerParams)
-|remove|当事件或方法被移除的时候触发，包括：removeEvent，removeEventFunction|Function(eventName, [ EventSub ])
+|remove|当事件或方法被移除的时候触发，包括：removeEvent，removeEventFunction|Function(eventName, [ EventSub ])  
 
 可以通过在初始化的`MultiEvent`类的时候修改这些字段，例如：  
 ```javascript
