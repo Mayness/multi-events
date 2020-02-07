@@ -197,7 +197,7 @@ class MultiEvents {
         return target._events.size;
       },
       set() {
-        console.warn('multi-events: "eventNameCount" property is readonly')
+        console.warn('multi-events: "eventKeyCount" property is readonly')
       }
     })
   }
