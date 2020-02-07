@@ -337,4 +337,5 @@ function defineAttr(target: MultiEvents, mapAttr: { [propName: string]: any }): 
   Object.defineProperties(target, mapAttr);
 }
 
+
 module.exports = MultiEvents
