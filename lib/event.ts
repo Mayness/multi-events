@@ -173,12 +173,33 @@ function unwrapId(value: any): symbol[] {
 }
 class MultiEvents {
   constructor(option: Option) {
-    this._events = new Map();
-    this._eventsCount = 0;
-    this._option = {
-      trigger: option?.trigger || 'trigger',
-      remove: option?.remove || 'remove'
-    };
+    const target = this;
+    defineAttr(this, {
+      '_events': new Map(),
+      '_eventsCount': 0,
+      '_option': {
+        trigger: option?.trigger || 'trigger',
+        remove: option?.remove || 'remove'
+      }
+    });
+    Object.defineProperty(target, 'eventsCount', {
+      enumerable: true,
+      get() {
+        return target._eventsCount;
+      },
+      set() {
+        console.warn('multi-events: "eventsCount" property is readonly')
+      }
+    })
+    Object.defineProperty(target, 'eventKeyCount', {
+      enumerable: true,
+      get() {
+        return target._events.size;
+      },
+      set() {
+        console.warn('multi-events: "eventNameCount" property is readonly')
+      }
+    })
   }
 
   @formatRes()
@@ -304,5 +325,16 @@ function onceWrap(eventArray: string, obj: any, target: MultiEvents): Function {
   };
 }
 
+function defineAttr(target: MultiEvents, mapAttr: { [propName: string]: any }): void {
+  for (let item in mapAttr) {
+    mapAttr[ item ] = {
+      value: mapAttr[ item ],
+      enumerable: false,
+      writable: true,
+      configurable: true,
+    }
+  }
+  Object.defineProperties(target, mapAttr);
+}
 
 module.exports = MultiEvents

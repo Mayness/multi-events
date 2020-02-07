@@ -31,6 +31,12 @@ const event = new MultiEvent(option);
 # option
 修改默认event别名对象，可以不传递参数，按照默认配置。<a href="#event">详情</a>
 
+# 属性
+|名称|场景|注意|
+|:-:|:-:|:-:|  
+|eventsCount|获取当前实例订阅事件的数量|只读
+|eventKeyCount|获取当前实例订阅事件名的数量|只读
+
 # 方法
 ## emit 
 触发单个或多个订阅事件  

@@ -77,11 +77,11 @@ describe('test multi-event', () => {
     ]);
     const remove_A = event.removeEventFunction(onRes_A);
     expect(event._events.size).toBe(0);
-    expect(event._eventsCount).toBe(0);
+    expect(event.eventsCount).toBe(0);
     expect(remove_A).toEqual([true, true]);
     const onRes_B = event.on([ 'event1', 'event2' ], mockCallback_A);
     const remove_B = event.removeEventFunction([ onRes_B.event1, onRes_B.event2 ]);
-    expect(event._eventsCount).toBe(0);
+    expect(event.eventsCount).toBe(0);
     expect(remove_B).toEqual([true, true]);
     const onRes_C = event.on('event1', mockCallback_A);
     const onRes_D = event.on('event2', mockCallback_B);
@@ -94,10 +94,11 @@ describe('test multi-event', () => {
     const remove_E = event.removeEventFunction([ onRes_F, onRes_E.event1, 'string' ]);
     expect(remove_E).toEqual([ true, true, false ]);
     expect(event._events.get('event2')).toBeDefined();
-    expect(event._eventsCount).toBe(1);
+    expect(event.eventsCount).toBe(1);
     const remove_F = event.removeEventFunction(onRes_E);
     expect(remove_F).toEqual([ false, true ]);
-    expect(event._eventsCount).toBe(0);
+    expect(event.eventsCount).toBe(0);
+    expect(event.eventKeyCount).toBe(0);
   })
 
   test('test remove all subscription in the event name', () => {
