@@ -44,14 +44,14 @@ function triggerEventReq(target: MultiEvents, key: string, descriptor: PropertyD
       } else if (Array.isArray(callback)) {
         callback.forEach(fn => {
           if (typeof fn !== 'function') {
-            throw Error('single callback parameter type error:' + fn);
+            warnLog('Single callback parameter type error:' + fn);
           }
         });
       } else {
-        throw Error('callback parameter type error:' + callback);
+        warnLog('Callback parameter type error:' + callback);
       }
     } else {
-      throw Error('Missing necessary parameters:' + eventName);
+      warnLog('Missing necessary parameters:' + eventName);
     }
     const eventArray = Array.isArray(eventName) ? Array.from(new Set(eventName)) : [eventName];
     return Reflect.apply(fn, this, [ eventArray, callback ]);
@@ -77,7 +77,7 @@ function formatReq(disRepeat: boolean = true, index: number = 0): MethodDecorato
           arguments[0] = Array.from(new Set(param));
         }
       } else {
-        throw Error('parameter type error:' + param);
+        warnLog('Parameter type error:' + param);
       }
       return Reflect.apply(fn, this, arguments);
     };
@@ -124,7 +124,7 @@ function removeEventFunctionCheck(target: MultiEvents, key: string, descriptor: 
     if (arr.length) {
       return Reflect.apply(fn, this, [arr]);
     } else {
-      throw Error('not fount events id:' + arr);
+      warnLog('Not fount events id:' + arr);
     }
   };
   return descriptor;
@@ -188,7 +188,7 @@ class MultiEvents {
         return target._eventsCount;
       },
       set() {
-        console.warn('multi-events: "eventsCount" property is readonly')
+        warnLog('"eventsCount" property is readonly')
       }
     })
     Object.defineProperty(target, 'eventKeyCount', {
@@ -197,7 +197,7 @@ class MultiEvents {
         return target._events.size;
       },
       set() {
-        console.warn('multi-events: "eventKeyCount" property is readonly')
+        warnLog('"eventKeyCount" property is readonly')
       }
     })
   }
@@ -274,7 +274,7 @@ class MultiEvents {
           };
         }
       } else {
-        console.warn(`multi-events: Don’t remove hook event: '${eventName}', maybe you could alias the hook event at initialization time`)
+        warnLog(`Don’t remove hook event: '${String(eventName)}', maybe you could alias the hook event at initialization time`)
       };
       cache.push(flag);
     }
@@ -307,13 +307,17 @@ class MultiEvents {
           }
         }
       } else {
-        console.warn(`multi-events: Don’t remove hook event: '${eventName}', maybe you could alias the hook event at initialization time`)
+        warnLog(`Don’t remove hook event: '${String(eventName)}', maybe you could alias the hook event at initialization time`)
       };
       cache.push(flag);
     }
     this._eventsCount -= removeNum;
     return cache;
   }
+}
+
+function warnLog(str: string): void {
+  console.warn(`Multi-events warning: ${str}`);
 }
 
 function onceWrap(eventArray: string, obj: any, target: MultiEvents): Function {

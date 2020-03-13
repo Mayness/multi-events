@@ -13,7 +13,7 @@
 [codecov-url]: https://codecov.io/github/Mayness/multi-events?branch=master
 
 # 简介
-用来处理多个订阅事件和方法的订阅发布模块
+用来处理多个订阅事件和方法的订阅发布模块  
 
 # 安装
 npm install multi-events

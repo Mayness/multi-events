@@ -54,10 +54,6 @@ describe('test multi-event', () => {
     expect(mockCallback_A.mock.calls[3]).toEqual(['aaa', 'bbb']);
     expect(mockCallback_B.mock.calls[2]).toEqual(['aaa', 'bbb']);
     expect(mockCallback_B.mock.calls[3]).toEqual(['aaa', 'bbb']);
-    function wrongFunction() {
-      event.on('event3', [ 'not function' ])
-    }
-    expect(wrongFunction).toThrow('single callback parameter type error:not function');
   })
 
   test('test once emit event', () => {
